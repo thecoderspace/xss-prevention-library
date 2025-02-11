@@ -1,92 +1,68 @@
 const XSSPrevention = {
-    sanitizeHTML: (input) => input
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#x27;"),
-    
-    sanitizeJavaScript: (input) => input
-        .replace(/'/g, "\\'")
-        .replace(/"/g, '\\"')
-        .replace(/`/g, "\\`")
-        .replace(/\\/g, "\\\\")
-        .replace(/\$/g, "\\$")
-        .replace(/\(/g, "\\(")
-        .replace(/\)/g, "\\)"),
-    
-    sanitizeHTMLAttributes: (input) => input.replace(/"/g, "&quot;").replace(/'/g, "&#x27;"),
-    
-    sanitizeJavaAttributes: (input) => input.replace(/"/g, "\\\"").replace(/'/g, "\\'"),
-    
-    encodeURL: (input) => encodeURIComponent(input),
-    
-    sanitizeASCII: (input) => input
-        .replace(/&/g, "&#38;")
-        .replace(/</g, "&#60;")
-        .replace(/>/g, "&#62;")
-        .replace(/'/g, "&#39;")
-        .replace(/"/g, "&#34;")
-        .replace(/`/g, "&#96;")
-        .replace(/\\/g, "&#92;"),
-    
-    escapeJavaScriptString: (input) => input
-        .replace(/\\/g, "\\\\")
-        .replace(/'/g, "\\'")
-        .replace(/"/g, "\\\"")
-        .replace(/\n/g, "\\n")
-        .replace(/\r/g, "\\r"),
-    
-    escapeJavaString: (input) => input
-        .replace(/\\/g, "\\\\")
-        .replace(/"/g, "\\\"")
-        .replace(/'/g, "\\'")
-        .replace(/\n/g, "\\n")
-        .replace(/\r/g, "\\r"),
-    
-    removeScriptTags: (input) => input.replace(/<script.*?>.*?<\/script>/gi, ""),
-    
-    removeImageTags: (input) => input.replace(/<img.*?>/gi, ""),
-    
-    removeSVGTags: (input) => input.replace(/<svg.*?>.*?<\/svg>/gi, ""),
-    
-    removeIframeTags: (input) => input.replace(/<iframe.*?>.*?<\/iframe>/gi, ""),
-    
-    removeMetaTags: (input) => input.replace(/<meta.*?>/gi, ""),
-    
-    advancedSanitize: (input) => input.replace(/<(script|iframe|object|embed|form|img|svg|meta|link|style).*?>.*?<\/\1>/gi, ""),
-    
-    escapeJSON: (input) => input
-        .replace(/"/g, "\\\"")
-        .replace(/</g, "\\u003C")
-        .replace(/>/g, "\\u003E")
-        .replace(/'/g, "\\u0027"),
-    
+    // Combined HTML sanitization function
+    sanitizeHTML: (input) => {
+        return input
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#x27;")
+            .replace(/<(script|iframe|object|embed|form|img|svg|meta|link|style).*?>.*?<\/\1>/gi, "")
+            .replace(/<img.*?>/gi, "")
+            .replace(/<svg.*?>.*?<\/svg>/gi, "")
+            .replace(/<iframe.*?>.*?<\/iframe>/gi, "")
+            .replace(/<meta.*?>/gi, "")
+            .replace(/<!--.*?-->/g, "")
+            .replace(/<!\[CDATA\[.*?\]\]>/gi, "")
+            .replace(/<style.*?>.*?<\/style>/gi, "")
+            .replace(/<link.*?>/gi, "")
+            .replace(/<noscript.*?>.*?<\/noscript>/gi, "")
+            .replace(/<base.*?>/gi, "")
+            .replace(/on\w+=".*?"/gi, "")
+            .replace(/expression\(|javascript:/gi, "");
+    },
+
+    // Combined JavaScript sanitization function
+    sanitizeJavaScript: (input) => {
+        return input
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '\\"')
+            .replace(/`/g, "\\`")
+            .replace(/\\/g, "\\\\")
+            .replace(/\$/g, "\\$")
+            .replace(/\(/g, "\\(")
+            .replace(/\)/g, "\\)")
+            .replace(/\n/g, "\\n")
+            .replace(/\r/g, "\\r");
+    },
+
+    // Combined URL encoding function
+    encodeURL: (input) => {
+        return encodeURIComponent(input)
+            .replace(/</g, "%3C")
+            .replace(/>/g, "%3E")
+            .replace(/"/g, "%22")
+            .replace(/'/g, "%27");
+    },
+
+    // Combined input validation function
     validateInput: (input) => /^[a-zA-Z0-9_ ]*$/.test(input) ? input : "Invalid input",
-    
-    encodeASCIIURL: (url) => url.replace(/</g, "%3C").replace(/>/g, "%3E").replace(/"/g, "%22").replace(/'/g, "%27"),
-    
-    removeEventHandlers: (input) => input.replace(/on\w+=".*?"/gi, ""),
-    
-    sanitizeCSS: (input) => input.replace(/expression\(|javascript:/gi, ""),
-    
-    sanitizeAdvancedASCII: (input) => input.replace(/[\u0080-\uFFFF]/g, (char) => `&#${char.charCodeAt(0)};`),
-    
-    removeCommentTags: (input) => input.replace(/<!--.*?-->/g, ""),
-    
-    sanitizeJSONKeys: (input) => input.replace(/[^a-zA-Z0-9_]/g, ""),
-    
-    removeCDATASections: (input) => input.replace(/<!\[CDATA\[.*?\]\]>/gi, ""),
-    
-    removeStyleTags: (input) => input.replace(/<style.*?>.*?<\/style>/gi, ""),
-    
-    removeLinkTags: (input) => input.replace(/<link.*?>/gi, ""),
-    
-    removeNoscriptTags: (input) => input.replace(/<noscript.*?>.*?<\/noscript>/gi, ""),
-    
-    neutralizeBaseHref: (input) => input.replace(/<base.*?>/gi, ""),
-    
-    stripHexEncoding: (input) => input.replace(/%[0-9A-F]{2}/gi, ""),
+
+    // Advanced sanitization function for more specific cases
+    advancedSanitize: (input) => {
+        return input.replace(/<(script|iframe|object|embed|form|img|svg|meta|link|style).*?>.*?<\/\1>/gi, "")
+            .replace(/<script.*?>.*?<\/script>/gi, "")
+            .replace(/<iframe.*?>.*?<\/iframe>/gi, "")
+            .replace(/<img.*?>/gi, "")
+            .replace(/<svg.*?>.*?<\/svg>/gi, "")
+            .replace(/<meta.*?>/gi, "")
+            .replace(/<!--.*?-->/g, "")
+            .replace(/<!\[CDATA\[.*?\]\]>/gi, "")
+            .replace(/<style.*?>.*?<\/style>/gi, "")
+            .replace(/<link.*?>/gi, "")
+            .replace(/<noscript.*?>.*?<\/noscript>/gi, "")
+            .replace(/<base.*?>/gi, "");
+    }
 };
 
 export default XSSPrevention;
